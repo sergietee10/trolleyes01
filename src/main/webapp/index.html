@@ -1,0 +1,265 @@
+<html>
+
+    <head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="sha-256.js"></script>
+    </head>
+
+    <body>
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col text-center mt-3">
+                        <h3>Authentication</h3>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5" id="form">
+                    <div class="col-3">
+                        <form id="formulario">
+                            <div class="form-group">
+                                <label id="primeroLabel">Login</label>
+                                <input type="text" class="form-control" id="login">
+                                <div class="alert alert-danger" id="diverrorlogin">
+                                    <strong>Error !</strong>
+                                    <div id="errorlogin"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="segundoLabel">Password</label>
+                                <input type="password" class="form-control" id="pass">
+                                <div class="alert alert-danger" id="diverrorpass">
+                                    <strong>Error!</strong>
+                                    <div id="errorpass"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="dni">Dni</label>
+                                <input type="text" class="form-control" id="dni">
+                                <div class="alert alert-danger" id="diverrordni">
+                                    <strong>Error !</strong>
+                                    <div id="errordni"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ape1">Nombre</label>
+                                <input type="text" class="form-control" id="nombre">
+                                <div class="alert alert-danger" id="diverrornombre">
+                                    <strong>Error !</strong>
+                                    <div id="errornombre"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ape1">Primer apellido</label>
+                                <input type="text" class="form-control" id="ape1">
+                                <div class="alert alert-danger" id="diverrorape1">
+                                    <strong>Error !</strong>
+                                    <div id="errorape1"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="ape2">Segundo apellido</label>
+                                <input type="text" class="form-control" id="ape2">
+                                <div class="alert alert-danger" id="diverrorape2">
+                                    <strong>Error !</strong>
+                                    <div id="errorape2"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label >Tipo de usuario</label>
+                                <select class="custom-select" id="select">
+                                    <option value=1>
+                                        Administrador
+                                    </option>
+                                    <option value=2>
+                                        Usuario
+                                    </option>
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-5">
+                    <button type="reset" class="btn btn-primary ml-1" id="crear">Crear usuario</button>
+                </div>
+                <div class="row">
+                    <table class="table">
+                        <tbody class="text-center" id="cuerpo">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        <script>
+            $(document).ready(function () {
+                //Escondo los errores de los inputs
+                esconderErrores();
+                //Llamo al metodo que decide si el boton crear usuario tiene que estar habilitado o no
+                desabilitarBoton();
+
+                $("#login").keyup(function () {
+                    validar('login');
+                })
+                $("#pass").keyup(function () {
+                    validar('pass');
+                })
+                $("#dni").keyup(function () {
+                    validar('dni');
+                })
+                $("#ape1").keyup(function () {
+                    validar('ape1');
+                })
+                $("#ape2").keyup(function () {
+                    validar('ape2');
+                })
+                $("#nombre").keyup(function () {
+                    validar('nombre');
+                })
+
+                //Funcion que me muestra los mensajes de error debajo de cada input
+                function mensajes(error, div, mensaje) {
+                    $(`#error${error}`).empty().append(mensaje);
+                    $(`#diverror${div}`).show();
+                }
+                //Metodo de validacion del input primero
+                login = false;
+                pass = false;
+                dni = false;
+                ape1 = false;
+                ape2 = false;
+                nombre = false;
+
+                //Valido los datos de los inputs ya que cada vez que haya un keyup entrara aqui
+                function validar(data) {
+                    switchFalse(data);
+
+                    $(`#error${data}`).empty();
+                    $(`#diverror${data}`).hide();
+                    valor = $(`#${data}`).val();
+                    if (valor.length == 0) {
+                        mensajes(data, data, `Inserta datos en ${data}`);
+                    } else {
+                        switchTrue(data);
+                        guardarDatos(data, valor);
+                    }
+                    desabilitarBoton();
+                }
+
+                function esconderErrores() {
+                    $("#diverrorlogin").hide();
+                    $("#diverrorpass").hide();
+                    $("#diverrordni").hide();
+                    $("#diverrorape1").hide();
+                    $("#diverrorape2").hide();
+                    $("#diverrornombre").hide();
+                }
+
+                json = {
+                    nombre: '',
+                    login: '',
+                    pass: '',
+                    dni: '',
+                    ape1: '',
+                    ape2: '',
+                    id_tipoUsuario: ''
+                }
+                //Guardo los datos en variables
+                function guardarDatos(data, valor) {
+                    switch (data) {
+                        case 'login':
+                            json.login = valor;
+                            break;
+                        case 'pass':
+                            json.pass = forge_sha256(valor);
+                            break;
+                        case 'dni':
+                            json.dni = valor;
+                            break;
+                        case 'ape1':
+                            json.ape1 = valor;
+                            break;
+                        case 'ape2':
+                            json.ape2 = valor;
+                            break;
+                        case 'nombre':
+                            json.nombre = valor;
+                            break;
+                    }
+                }
+//Esto sirve para que el boton de crear se desabilite
+                function switchFalse(data) {
+                    switch (data) {
+                        case 'login':
+                            login = false;
+                            break;
+                        case 'pass':
+                            pass = false;
+                            break;
+                        case 'dni':
+                            dni = false;
+                            break;
+                        case 'ape1':
+                            ape1 = false;
+                            break;
+                        case 'ape2':
+                            ape2 = false;
+                            break;
+                        case 'nombre':
+                            nombre = false;
+                            break;
+                    }
+                }
+//Esto sirve para que el boton de crear se habilite
+                function switchTrue(data) {
+                    switch (data) {
+                        case 'login':
+                            login = true;
+                            break;
+                        case 'pass':
+                            pass = true;
+                            break;
+                        case 'dni':
+                            dni = true;
+                            break;
+                        case 'ape1':
+                            ape1 = true;
+                            break;
+                        case 'ape2':
+                            ape2 = true;
+                            break;
+                        case 'nombre':
+                            nombre = true;
+                            break;
+                    }
+                }
+                //Funcion para desabilitar el boton enviar
+                function desabilitarBoton() {
+                    if (login == true && pass == true && dni == true && ape1 == true && ape2 == true && nombre == true) {
+                        $("#loggearse").attr("disabled", false);
+                        $("#crear").attr("disabled", false);
+                    } else {
+                        $("#loggearse").attr("disabled", true);
+                        $("#crear").attr("disabled", true);
+                    }
+                }
+
+                $("#crear").click(function () {
+                    json.id_tipoUsuario = $("select#select").val();
+                    console.log(json);
+                    $.ajax({
+                        url: `json?ob=usuario&op=create`,
+                        type: 'post',
+                        contentType: "application/json; charset=utf-8",
+                        traditional: true,
+                        data: JSON.stringify(json),
+                        success: function (data) {
+                            console.log(data);
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+
+</html>
